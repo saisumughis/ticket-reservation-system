@@ -55,12 +55,12 @@ public class ClientHandler implements Runnable {
             outputStream.writeUTF(sendToServer);
             logger.info(inputStream.readUTF());
             while (true) {
-                String userDisplay = "\n*********** Enter your choice: **********\n";
+                String userDisplay = "\n---------- Enter your choice: ---------\n";
                 userDisplay += "1. Book Seats\n";
                 userDisplay += "2. Show total Available Seats\n";
                 userDisplay += "3. View Reservation\n";
                 userDisplay += "4. Exit\n";
-                userDisplay += "***************************";
+                userDisplay += "--------------------------------------";
                 logger.info(userDisplay);
                 int choice;
                 try {
@@ -120,6 +120,7 @@ public class ClientHandler implements Runnable {
                         logger.info(inputStream.readUTF());
                         break;
                     case 4:
+                        logger.info("Thanks for using our application!");
                         System.exit(0);
                     default:
                         logger.error("Invalid Choice");

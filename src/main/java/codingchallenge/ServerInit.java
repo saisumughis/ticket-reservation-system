@@ -40,8 +40,6 @@ public class ServerInit {
                 return;
             }
 
-            venue.print();
-
             ServerSocket serverSocket = new ServerSocket(port);
             logger.info("Ticketing Server is listening on port " + port);
             logger.info("Waiting for incoming client connections..");
