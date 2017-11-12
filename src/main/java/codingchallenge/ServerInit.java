@@ -29,10 +29,12 @@ public class ServerInit {
                 logger.info("No of seats per row: " +  seatsPerRow);
             }
             else if(args.length == 3) {
-                port = Integer.parseInt(args[1]);
-                rows = Integer.parseInt(args[2]);
-                seatsPerRow = Integer.parseInt(args[3]);
+                port = Integer.parseInt(args[0]);
+                rows = Integer.parseInt(args[1]);
+                seatsPerRow = Integer.parseInt(args[2]);
                 venue = new Venue(rows,seatsPerRow);
+                logger.info("No of rows: " +  rows);
+                logger.info("No of seats per row: " +  seatsPerRow);
             } else {
                 logger.error("Usage: java ServerInit port rows seatsperrow");
                 return;

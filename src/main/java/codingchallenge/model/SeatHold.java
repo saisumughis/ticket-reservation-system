@@ -2,6 +2,8 @@ package codingchallenge.model;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import codingchallenge.constants.Constants;
 import org.apache.log4j.Logger;
 
 /**
@@ -76,7 +78,11 @@ public class SeatHold {
         Set<Map.Entry<Integer,String>> set  = this.seatsHeldOrReserved.entrySet();
         for(Map.Entry entry: set) {
             res += "Row Number:" + entry.getKey() + " ";
-            res += "Seat Number(s):" + entry.getValue() + " ";
+            String[] seatsRange = entry.getValue().toString().split(Constants.delimiter);
+            if(!seatsRange[0].equals(seatsRange[1]))
+                res += "Seat Number(s):" + entry.getValue() + " ";
+            else
+                res += "Seat Number:" + seatsRange[0] + " ";
         }
         return res;
     }

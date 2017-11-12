@@ -23,7 +23,6 @@ public class ServerHandler implements Runnable{
     private int id;
     private static Venue venue = ServerInit.venue;
     private static HashMap<String, LinkedHashSet<SeatHold>> customerReservationInfoMap = new HashMap<>();
-    private static HashMap<Integer, String > clientInfoMap = new HashMap<>();
     private static final ReentrantLock lock = new ReentrantLock();
     private TicketService ticketService;
     private String emailId;
@@ -62,7 +61,7 @@ public class ServerHandler implements Runnable{
 
     /**
      * Process the user requests
-     * @param input
+     * @param input the input received from the user
      * @return the message after processing user input
      */
     private synchronized String processClientInput(String input) {
@@ -70,24 +69,18 @@ public class ServerHandler implements Runnable{
         if(input.contains("REGISTER")) {
             String message;
             String inputEmailID = input.split(Constants.delimiter)[1];
-
-            if(clientInfoMap.containsKey(id)) {
-                return "Already registered with email id=" + clientInfoMap.get(id);
-            }
             if(isUserExists(inputEmailID)) {
                 emailId = inputEmailID;
-                message = "EmailID is already registered.";
+                message = "EmailID is already registered.\n";
+                return message + getReservationDetails();
             }else {
                 emailId = inputEmailID;
                 updateUserInfo(emailId, null);
                 message = "Registered Successfully.";
-                clientInfoMap.put(id,emailId);
             }
             return message;
         }else if(input.contains("BOOK")){
             int numSeats = Integer.parseInt(input.split(Constants.delimiter)[1]);
-            if(!isUserExists(emailId))
-                return "Please register";
             if(venue.getTotalAvailable() == 0) {
                 return "Sorry, All tickets Sold! Please try again later!";
             }
@@ -99,10 +92,6 @@ public class ServerHandler implements Runnable{
             startTimer(seatHold);
             return seatHold.responseToUser();
         }else if(input.equals("RESERVE")) {
-            if(!isUserExists(emailId))
-                return "Please register";
-            if(isUserExists(emailId) && getUserInfo(emailId).size() ==  0)
-                return "Please book your tickets.";
             if(ticketService.isTimerExpired())
                 return "Session Expired. Please book again.";
             timer.cancel();
@@ -111,21 +100,46 @@ public class ServerHandler implements Runnable{
             updateUserInfo(emailId,seatHold);
             return seatHold.responseToUser();
         }else if(input.contains("VIEW")) {
-            if(!isUserExists(emailId))
-                return "Please register";
-            if(isUserExists(emailId) && getUserInfo(emailId).size() ==  0)
-                return "Please book/reserve your tickets.";
-            LinkedHashSet<SeatHold> seatHolds = getUserInfo(emailId);
-            String res = "\n ****** Reservation Details ****** \n" ;
-            for(SeatHold seatHold: seatHolds) {
-                res += seatHold.responseToUser() + "\n";
+                return getReservationDetails();
+        } else if(input.contains("SHOW TOTAL")) {
+            return "Seats available:" + venue.getTotalAvailable();
+        }else if(input.contains("CANCEL")) {
+            if(!ticketService.isTimerExpired()) {
+                SeatHold lastHeldSeat = (SeatHold) getUserInfo(emailId).toArray()[getUserInfo(emailId).size() - 1];
+                timer.cancel();
+                ticketService.resetHeldSeats(lastHeldSeat);
+                removeSeatHeld(emailId, lastHeldSeat);
             }
-            res += "*******************";
-            return res;
+            return getReservationDetails();
         }
         return "";
     }
 
+    /**
+     *  Gets the list of reservations by a user
+     * @return Reservation details
+     */
+
+    private String getReservationDetails() {
+        LinkedHashSet<SeatHold> seatHolds = getUserInfo(emailId);
+        String res;
+        if(seatHolds.size() > 0) {
+            res = "\n ****** Reservation Details ****** \n";
+            for (SeatHold seatHold : seatHolds) {
+                res += seatHold.responseToUser() + "\n";
+            }
+            res += "*******************";
+        }else {
+            return "You currently have no reservation(s).";
+        }
+        return res;
+    }
+
+    /**
+     * Checks if the user is already registered.
+     * @param emailId Email id of the user
+     * @return flag that indicates if the user is registered or not
+     */
     private Boolean isUserExists(String emailId) {
         lock.lock();
         try {
@@ -159,6 +173,11 @@ public class ServerHandler implements Runnable{
         return seatHold;
     }
 
+    /**
+     * Removes the seat hold information
+     * @param emailId The email id of the user
+     * @param seatHold The seathold object to be updated
+     */
     private void removeSeatHeld(String emailId, SeatHold seatHold) {
         lock.lock();
         try {
@@ -169,6 +188,11 @@ public class ServerHandler implements Runnable{
         }
     }
 
+    /**
+     * Gets the information of the user.
+     * @param emailId The email id of the user
+     * @return The list of reservations by the user
+     */
     private LinkedHashSet<SeatHold> getUserInfo(String emailId) {
         lock.lock();
         try {
@@ -181,6 +205,10 @@ public class ServerHandler implements Runnable{
         return null;
     }
 
+    /**
+     * Holds the seats for a specified timeout
+     * @param seatHold seathold object
+     */
     private void startTimer(SeatHold seatHold) {
         timer = new Timer();
 
