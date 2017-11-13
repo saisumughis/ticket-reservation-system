@@ -1,5 +1,11 @@
 # Ticket Reservation System
+A simple ticket reservation system that facilitates the discovery, temporary hold, and final reservation of seats within a high-demand performance
+venue. The project is implemented using socket programming in Java 8. The build tool used is Maven.
 
+## Prerequisite
+Java 8
+
+## Instructions
 Server Start Up Command
 ```
 cd ticket-reservation-system 
