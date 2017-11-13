@@ -21,7 +21,7 @@ java -cp target/codingchallenge-1.0-SNAPSHOT-jar-with-dependencies.jar codingcha
 
 Multiple Clients can be started simultaneously in different terminals.
 
-##Client Start Up Command
+## Client Start Up Command
 
 cd ticket-reservation-system
 
@@ -35,5 +35,6 @@ Example Usage:
 java -cp target/codingchallenge-1.0-SNAPSHOT-jar-with-dependencies.jar codingchallenge.ClientInit localhost 9999
 
 
-##Running Unit Tests
+## Running Unit Tests
+
 mvn test
